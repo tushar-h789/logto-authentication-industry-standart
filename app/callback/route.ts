@@ -62,6 +62,7 @@ export async function GET(request: NextRequest) {
     // console.log("token-response", tokenResponse);
 
     const refreshToken = tokens.refreshToken;
+    const idToken = tokens.idToken;
     const expiresIn = tokens.expiresIn; // seconds
     const expiresAt = expiresIn
       ? Math.floor(Date.now() / 1000) + expiresIn
@@ -82,6 +83,16 @@ export async function GET(request: NextRequest) {
         secure: process.env.NODE_ENV === "production",
         path: "/",
         maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+      });
+    }
+
+    if (idToken) {
+      res.cookies.set("logto_id_token", idToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        ...(expiresIn ? { maxAge: expiresIn } : {}),
       });
     }
 

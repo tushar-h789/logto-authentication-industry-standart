@@ -4,8 +4,9 @@ const TOKEN_COOKIE_NAME = "logto_token_set";
 const REFRESH_TOKEN_COOKIE_NAME = "logto_refresh_token";
 const EXPIRES_AT_COOKIE_NAME = "logto_expires_at";
 const PKCE_VERIFIER_COOKIE_NAME = "pkce_verifier";
+const ID_TOKEN_COOKIE_NAME = "logto_id_token";
 
-console.log("token set in coocke", TOKEN_COOKIE_NAME);
+// console.log("token set in coocke", TOKEN_COOKIE_NAME);
 
 interface CookieOptions {
   secure: boolean;
@@ -26,10 +27,11 @@ const getSecureCookieOptions = (maxAgeSeconds?: number): CookieOptions => ({
 export async function storeTokens(
   accessToken: string,
   refreshToken?: string,
-  expiresIn?: number
+  expiresIn?: number,
+  idToken?: string
 ): Promise<void> {
   const cookieStore = await cookies();
-  console.log("cookie store", cookieStore);
+  // console.log("cookie store", cookieStore);
 
   const expiresAt = expiresIn
     ? Math.floor(Date.now() / 1000) + expiresIn
@@ -40,6 +42,14 @@ export async function storeTokens(
     accessToken,
     getSecureCookieOptions(expiresIn ? expiresIn : undefined)
   );
+
+  if (idToken) {
+    cookieStore.set(
+      ID_TOKEN_COOKIE_NAME,
+      idToken,
+      getSecureCookieOptions(expiresIn ? expiresIn : undefined)
+    );
+  }
 
   if (refreshToken) {
     cookieStore.set(
@@ -68,6 +78,12 @@ export async function getRefreshToken(): Promise<string | null> {
   return cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value ?? null;
 }
 
+export async function getIdToken(): Promise<string | null> {
+  const cookieStore = await cookies();
+  // console.log("cookie store", cookieStore);
+  return cookieStore.get(ID_TOKEN_COOKIE_NAME)?.value ?? null;
+}
+
 export async function getTokenExpiresAt(): Promise<number | null> {
   const cookieStore = await cookies();
   const expiresAt = cookieStore.get(EXPIRES_AT_COOKIE_NAME)?.value;
@@ -86,4 +102,5 @@ export async function clearTokens(): Promise<void> {
   cookieStore.delete(REFRESH_TOKEN_COOKIE_NAME);
   cookieStore.delete(EXPIRES_AT_COOKIE_NAME);
   cookieStore.delete(PKCE_VERIFIER_COOKIE_NAME);
+  cookieStore.delete(ID_TOKEN_COOKIE_NAME);
 }

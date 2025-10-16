@@ -48,7 +48,7 @@ export async function handleLoginCallback(
   code: string,
   codeVerifier: string,
   redirectUri: string
-): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }> {
+): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number; idToken?: string }> {
   const tokenResponse = await exchangeCodeForTokens(
     code,
     codeVerifier,
@@ -59,6 +59,7 @@ export async function handleLoginCallback(
   return {
     accessToken: tokenResponse.accessToken,
     refreshToken: tokenResponse.refreshToken,
+    idToken: tokenResponse.idToken,
     expiresIn: tokenResponse.expiresIn,
   };
 }
